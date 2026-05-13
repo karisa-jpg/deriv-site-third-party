@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FXBotHub Pro | Gateway To Advanced Deriv Trading</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- CANVAS BACKGROUND -->
+<canvas id="starCanvas"></canvas>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">FXBOTHUB</div>
+  <div class="loader-bar-outer"><div class="loader-bar-inner"></div></div>
+  <div class="loader-text">Initializing Trading Systems...</div>
+</div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a href="index.html" class="nav-logo">
+    <div class="logo-icon"><i class="fas fa-chart-line"></i></div>
+    FXBOT<span class="accent">HUB</span>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html#features">Features</a></li>
+    <li><a href="index.html#services">Services</a></li>
+    <li><a href="index.html#signals">Signals</a></li>
+    <li><a href="index.html#pricing">Pricing</a></li>
+    <li><a href="index.html#faq">FAQ</a></li>
+    <li><a href="index.html#contact" class="nav-cta">Get Started</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger" onclick="toggleNav()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+<section style="padding: 150px 5%; text-align: center; min-height: 60vh;">
+  <h1 class="section-title" style="margin-top: 50px;">Latest <span>Insights</span></h1>
+  <p class="section-sub" style="margin: 30px auto; max-width: 800px;">
+    Stay updated with the latest market trends, bot strategies, and trading tips from our expert analysts.
+  </p>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 50px;">
+    <div class="feature-card">
+      <h3 style="color: var(--gold); margin-bottom: 15px;">Maximizing Profits with FX-BOT 5.0</h3>
+      <p>Learn the optimal settings for our latest synthetic indices bot...</p>
+      <a href="#" style="color: var(--gold); text-decoration: none; display: block; margin-top: 15px;">Read More →</a>
+    </div>
+    <div class="feature-card">
+      <h3 style="color: var(--gold); margin-bottom: 15px;">Understanding Volatility Indices</h3>
+      <p>A deep dive into how V75 and V100 markets operate and how to trade them...</p>
+      <a href="#" style="color: var(--gold); text-decoration: none; display: block; margin-top: 15px;">Read More →</a>
+    </div>
+  </div>
+</section>
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-icon"><i class="fas fa-chart-line"></i></div>
+        FXBOT<span class="accent">HUB</span>
+      </a>
+      <p>Kenya's premier Deriv trading ecosystem. Empowering traders with AI-powered bots, real-time signals, and expert mentorship since 2023.</p>
+      <div class="footer-socials">
+        <a href="#" class="social-btn"><i class="fab fa-telegram"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-whatsapp"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-youtube"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-twitter"></i></a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <ul>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Trading Bots</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Live Signals</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Analysis Tool</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Mentorship</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Copy Trading</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Markets</h4>
+      <ul>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Synthetic Indices</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Forex Pairs</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Boom & Crash</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Jump Indices</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Commodities</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="about.html"><i class="fas fa-chevron-right"></i> About Us</a></li>
+        <li><a href="blog.html"><i class="fas fa-chevron-right"></i> Blog</a></li>
+        <li><a href="careers.html"><i class="fas fa-chevron-right"></i> Careers</a></li>
+        <li><a href="privacy.html"><i class="fas fa-chevron-right"></i> Privacy Policy</a></li>
+        <li><a href="contact.html"><i class="fas fa-chevron-right"></i> Contact Us</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2024 <span>FXBotHub</span> · Made with ❤️ in Kenya</div>
+    <div class="footer-disclaimer">⚠️ Trading involves risk. Past performance is not indicative of future results. Trade responsibly.</div>
+    <div class="footer-copy">Powered by <span>Deriv API</span></div>
+  </div>
+</footer>
+
+<!-- CHART.JS CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script src="main.js"></script>
+</body>
+</html>
