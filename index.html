@@ -1,1 +1,2145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EliteTraders Pro | Gateway To Advanced Deriv Trading</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --gold: #f0b429;
+      --gold-dark: #c88b00;
+      --gold-light: #ffe080;
+      --black: #050508;
+      --dark: #0a0a0f;
+      --dark2: #111118;
+      --dark3: #18181f;
+      --card: #13131a;
+      --border: rgba(240,180,41,0.18);
+      --text: #e8e8f0;
+      --muted: #7a7a9a;
+      --green: #00e676;
+      --red: #ff1744;
+      --blue: #2979ff;
+      --purple: #aa00ff;
+    }
 
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--black);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ===================== CANVAS BACKGROUND ===================== */
+    #starCanvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ===================== SCROLLBAR ===================== */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--dark); }
+    ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+    /* ===================== LOADER ===================== */
+    #loader {
+      position: fixed;
+      inset: 0;
+      background: var(--black);
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.6s ease, visibility 0.6s;
+    }
+    #loader.hide { opacity: 0; visibility: hidden; }
+    .loader-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--gold);
+      letter-spacing: 4px;
+      margin-bottom: 30px;
+      text-shadow: 0 0 30px rgba(240,180,41,0.8);
+      animation: pulse-glow 1.5s ease-in-out infinite;
+    }
+    .loader-bar-outer {
+      width: 280px;
+      height: 3px;
+      background: rgba(240,180,41,0.15);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .loader-bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light));
+      width: 0%;
+      border-radius: 10px;
+      animation: loadBar 2.5s ease forwards;
+    }
+    .loader-text {
+      margin-top: 14px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.85rem;
+      color: var(--muted);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    @keyframes loadBar { 0%{width:0%} 100%{width:100%} }
+    @keyframes pulse-glow {
+      0%,100%{text-shadow:0 0 20px rgba(240,180,41,0.6)}
+      50%{text-shadow:0 0 50px rgba(240,180,41,1), 0 0 80px rgba(240,180,41,0.4)}
+    }
+
+    /* ===================== NAVBAR ===================== */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      padding: 0 5%;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(5,5,8,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+    nav.scrolled {
+      height: 62px;
+      background: rgba(5,5,8,0.97);
+      box-shadow: 0 4px 30px rgba(240,180,41,0.07);
+    }
+    .nav-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--gold);
+      text-decoration: none;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-logo span.accent { color: #fff; }
+    .nav-logo .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      color: #000;
+      box-shadow: 0 0 15px rgba(240,180,41,0.4);
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 35px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: color 0.3s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px; left: 0;
+      width: 0; height: 2px;
+      background: var(--gold);
+      transition: width 0.3s ease;
+    }
+    .nav-links a:hover { color: var(--gold); }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      color: #000 !important;
+      padding: 9px 22px;
+      border-radius: 6px;
+      font-weight: 700 !important;
+      transition: all 0.3s ease !important;
+      box-shadow: 0 0 20px rgba(240,180,41,0.3);
+    }
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 35px rgba(240,180,41,0.5) !important;
+    }
+    .nav-cta::after { display: none !important; }
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 5px;
+    }
+    .hamburger span {
+      width: 24px; height: 2px;
+      background: var(--gold);
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+
+    /* ===================== HERO ===================== */
+    .hero {
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 100px 5% 60px;
+    }
+    .hero-bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(240,180,41,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(240,180,41,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+    .hero-radial {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 900px; height: 900px;
+      background: radial-gradient(circle, rgba(240,180,41,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 750px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(240,180,41,0.1);
+      border: 1px solid rgba(240,180,41,0.3);
+      color: var(--gold);
+      padding: 7px 18px;
+      border-radius: 50px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      animation: fadeInDown 0.8s ease forwards;
+    }
+    .badge-dot {
+      width: 8px; height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--green);
+      animation: blink 1.5s infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+    .hero h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2.2rem, 5.5vw, 4.2rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 22px;
+      animation: fadeInUp 1s ease 0.2s forwards;
+      opacity: 0;
+    }
+    .hero h1 .line1 { color: #fff; display: block; }
+    .hero h1 .line2 {
+      display: block;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold), var(--gold-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 40px;
+      max-width: 580px;
+      margin-left: auto;
+      margin-right: auto;
+      animation: fadeInUp 1s ease 0.4s forwards;
+      opacity: 0;
+    }
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeInUp 1s ease 0.6s forwards;
+      opacity: 0;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 36px;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      color: #000;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 25px rgba(240,180,41,0.35), 0 0 0 0 rgba(240,180,41,0.4);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -60%;
+      width: 40%;
+      height: 200%;
+      background: rgba(255,255,255,0.2);
+      transform: skewX(-20deg);
+      transition: left 0.5s ease;
+    }
+    .btn-primary:hover::before { left: 130%; }
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 40px rgba(240,180,41,0.55);
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 36px;
+      background: transparent;
+      color: var(--gold);
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 8px;
+      border: 1px solid rgba(240,180,41,0.4);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn-secondary:hover {
+      background: rgba(240,180,41,0.08);
+      border-color: var(--gold);
+      transform: translateY(-3px);
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 50px;
+      margin-top: 60px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+      animation: fadeInUp 1s ease 0.8s forwards;
+      opacity: 0;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat-num {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gold);
+      display: block;
+    }
+    .hero-stat-label {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.85rem;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* ===================== TICKER ===================== */
+    .ticker-wrap {
+      background: rgba(240,180,41,0.06);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 0;
+      overflow: hidden;
+      position: relative;
+      z-index: 2;
+    }
+    .ticker-track {
+      display: flex;
+      gap: 60px;
+      animation: tickerScroll 30s linear infinite;
+      white-space: nowrap;
+      width: max-content;
+    }
+    .ticker-track:hover { animation-play-state: paused; }
+    @keyframes tickerScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    .ticker-item .pair { color: var(--text); }
+    .ticker-item .price { color: var(--gold); }
+    .ticker-item .change.up { color: var(--green); }
+    .ticker-item .change.down { color: var(--red); }
+    .ticker-sep { color: var(--border); font-size: 1.5rem; }
+
+    /* ===================== SECTION BASE ===================== */
+    section { position: relative; z-index: 1; padding: 100px 5%; }
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+    .section-label::before, .section-label::after {
+      content: '';
+      width: 30px; height: 1px;
+      background: var(--gold);
+      opacity: 0.5;
+    }
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .section-title span {
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .section-sub {
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.8;
+      max-width: 560px;
+    }
+    .text-center { text-align: center; }
+    .text-center .section-sub { margin: 0 auto; }
+
+    /* ===================== LIVE CHART SECTION ===================== */
+    .live-chart-section {
+      background: var(--dark2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 80px 5%;
+    }
+    .chart-container {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 50px;
+      box-shadow: 0 0 60px rgba(0,0,0,0.5);
+    }
+    .chart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 28px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .chart-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      color: var(--gold);
+    }
+    .chart-tabs {
+      display: flex;
+      gap: 6px;
+    }
+    .chart-tab {
+      padding: 6px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .chart-tab.active, .chart-tab:hover {
+      background: rgba(240,180,41,0.15);
+      color: var(--gold);
+      border-color: rgba(240,180,41,0.4);
+    }
+    .chart-canvas-wrap {
+      padding: 20px 28px 30px;
+      position: relative;
+    }
+    #liveChart { width: 100% !important; height: 320px !important; }
+
+    /* ===================== FEATURES ===================== */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-top: 60px;
+    }
+    .feature-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 30px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s ease;
+      cursor: default;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .feature-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(240,180,41,0.4);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 30px rgba(240,180,41,0.08);
+    }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-icon {
+      width: 60px; height: 60px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 22px;
+      position: relative;
+    }
+    .feature-icon.gold {
+      background: rgba(240,180,41,0.12);
+      color: var(--gold);
+      box-shadow: 0 0 20px rgba(240,180,41,0.15);
+    }
+    .feature-icon.green {
+      background: rgba(0,230,118,0.1);
+      color: var(--green);
+      box-shadow: 0 0 20px rgba(0,230,118,0.1);
+    }
+    .feature-icon.blue {
+      background: rgba(41,121,255,0.1);
+      color: var(--blue);
+      box-shadow: 0 0 20px rgba(41,121,255,0.1);
+    }
+    .feature-icon.purple {
+      background: rgba(170,0,255,0.1);
+      color: var(--purple);
+      box-shadow: 0 0 20px rgba(170,0,255,0.1);
+    }
+    .feature-card h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+    .feature-card p {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.7;
+    }
+
+    /* ===================== SERVICES ===================== */
+    .services {
+      background: var(--dark2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 28px;
+      margin-top: 60px;
+    }
+    .service-card {
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 32px;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .service-card.featured {
+      background: linear-gradient(145deg, #181208, #1a1508);
+      border-color: rgba(240,180,41,0.45);
+      box-shadow: 0 0 40px rgba(240,180,41,0.08);
+    }
+    .service-badge {
+      position: absolute;
+      top: 22px; right: 22px;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      color: #000;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 4px 12px;
+      border-radius: 50px;
+      text-transform: uppercase;
+    }
+    .service-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .service-icon-wrap {
+      width: 70px; height: 70px;
+      background: rgba(240,180,41,0.1);
+      border: 1px solid rgba(240,180,41,0.2);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      color: var(--gold);
+      margin-bottom: 24px;
+    }
+    .service-card h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+    .service-card p {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+    .service-list {
+      list-style: none;
+      margin-bottom: 30px;
+    }
+    .service-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text);
+      font-size: 0.88rem;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .service-list li:last-child { border-bottom: none; }
+    .service-list li i { color: var(--gold); font-size: 0.75rem; }
+    .service-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--gold);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: gap 0.3s;
+    }
+    .service-link:hover { gap: 14px; }
+
+    /* ===================== PRICING ===================== */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 28px;
+      margin-top: 60px;
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .price-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 44px 36px;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+    .price-card.popular {
+      background: linear-gradient(145deg, #181208, #1a1508);
+      border-color: var(--gold);
+      box-shadow: 0 0 60px rgba(240,180,41,0.12);
+      transform: scale(1.03);
+    }
+    .price-card:hover {
+      transform: translateY(-8px) scale(1.01);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .price-card.popular:hover { transform: translateY(-8px) scale(1.04); }
+    .popular-badge {
+      position: absolute;
+      top: -1px; left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+      color: #000;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 5px 20px;
+      text-transform: uppercase;
+      border-radius: 0 0 10px 10px;
+    }
+    .price-plan {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .price-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    .price-amount {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--gold);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .price-amount sup { font-size: 1.2rem; vertical-align: top; margin-top: 10px; display: inline-block; }
+    .price-amount span { font-size: 1rem; color: var(--muted); }
+    .price-desc {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 30px;
+    }
+    .price-features {
+      list-style: none;
+      margin-bottom: 36px;
+      text-align: left;
+    }
+    .price-features li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.88rem;
+      color: var(--text);
+    }
+    .price-features li:last-child { border-bottom: none; }
+    .price-features li i.fa-check { color: var(--green); }
+    .price-features li i.fa-times { color: var(--muted); }
+    .price-features li.muted { color: var(--muted); }
+
+    /* ===================== STATS SECTION ===================== */
+    .stats-section {
+      background: var(--dark2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 80px 5%;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 30px;
+      margin-top: 50px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 28px;
+      text-align: center;
+      transition: all 0.4s;
+    }
+    .stat-card:hover {
+      border-color: rgba(240,180,41,0.4);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    }
+    .stat-number {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .stat-label {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.85rem;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .stat-icon {
+      font-size: 1.8rem;
+      color: var(--gold);
+      opacity: 0.3;
+      margin-bottom: 14px;
+    }
+
+    /* ===================== HOW IT WORKS ===================== */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 30px;
+      margin-top: 60px;
+      position: relative;
+    }
+    .steps-grid::before {
+      content: '';
+      position: absolute;
+      top: 45px;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(240,180,41,0.3), transparent);
+    }
+    .step-card {
+      text-align: center;
+      position: relative;
+      padding: 36px 24px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      transition: all 0.4s;
+    }
+    .step-card:hover {
+      border-color: rgba(240,180,41,0.35);
+      transform: translateY(-6px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    }
+    .step-num {
+      width: 54px; height: 54px;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: #000;
+      margin: 0 auto 22px;
+      box-shadow: 0 0 20px rgba(240,180,41,0.3);
+    }
+    .step-card h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+    .step-card p { color: var(--muted); font-size: 0.88rem; line-height: 1.7; }
+
+    /* ===================== TESTIMONIALS ===================== */
+    .testimonials {
+      background: var(--dark2);
+      border-top: 1px solid var(--border);
+    }
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 60px;
+    }
+    .testimonial-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 34px 30px;
+      transition: all 0.4s;
+    }
+    .testimonial-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(240,180,41,0.3);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    }
+    .testimonial-stars {
+      color: var(--gold);
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+      letter-spacing: 3px;
+    }
+    .testimonial-text {
+      color: var(--text);
+      font-size: 0.93rem;
+      line-height: 1.7;
+      margin-bottom: 24px;
+      font-style: italic;
+    }
+    .testimonial-text::before { content: '"'; color: var(--gold); font-size: 1.5rem; }
+    .testimonial-text::after { content: '"'; color: var(--gold); font-size: 1.5rem; }
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .avatar {
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #000;
+      flex-shrink: 0;
+    }
+    .avatar.gold { background: linear-gradient(135deg, var(--gold-dark), var(--gold)); }
+    .avatar.green { background: linear-gradient(135deg, #00b248, var(--green)); }
+    .avatar.blue { background: linear-gradient(135deg, #1a5cd6, var(--blue)); }
+    .author-name {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .author-tag {
+      font-size: 0.8rem;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    /* ===================== FAQ ===================== */
+    .faq-list { max-width: 800px; margin: 60px auto 0; }
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 14px;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    .faq-item.open {
+      border-color: rgba(240,180,41,0.35);
+      box-shadow: 0 0 20px rgba(240,180,41,0.06);
+    }
+    .faq-question {
+      width: 100%;
+      background: var(--card);
+      border: none;
+      padding: 20px 26px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      text-align: left;
+      transition: color 0.3s;
+    }
+    .faq-item.open .faq-question { color: var(--gold); }
+    .faq-icon {
+      font-size: 1.2rem;
+      color: var(--gold);
+      transition: transform 0.3s;
+      flex-shrink: 0;
+    }
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+    .faq-answer {
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.3s ease;
+    }
+    .faq-item.open .faq-answer { max-height: 300px; }
+    .faq-answer p {
+      padding: 16px 26px 20px;
+      color: var(--muted);
+      font-size: 0.93rem;
+      line-height: 1.7;
+    }
+
+    /* ===================== CTA SECTION ===================== */
+    .cta-section {
+      padding: 100px 5%;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(240,180,41,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-inner {
+      position: relative;
+      z-index: 2;
+      background: var(--card);
+      border: 1px solid rgba(240,180,41,0.25);
+      border-radius: 24px;
+      padding: 80px 50px;
+      max-width: 800px;
+      margin: 0 auto;
+      box-shadow: 0 0 80px rgba(0,0,0,0.4), 0 0 40px rgba(240,180,41,0.06);
+    }
+    .cta-inner h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+    .cta-inner p { color: var(--muted); font-size: 1rem; line-height: 1.8; margin-bottom: 36px; }
+
+    /* ===================== FOOTER ===================== */
+    footer {
+      background: var(--dark);
+      border-top: 1px solid var(--border);
+      padding: 70px 5% 30px;
+      position: relative;
+      z-index: 1;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 50px;
+      margin-bottom: 60px;
+    }
+    .footer-brand .nav-logo { margin-bottom: 16px; display: inline-flex; }
+    .footer-brand p {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.7;
+      margin-bottom: 22px;
+    }
+    .footer-socials {
+      display: flex;
+      gap: 10px;
+    }
+    .social-btn {
+      width: 38px; height: 38px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    .social-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(240,180,41,0.08);
+    }
+    .footer-col h4 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 10px; }
+    .footer-col ul li a {
+      color: var(--muted);
+      font-size: 0.88rem;
+      text-decoration: none;
+      transition: color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .footer-col ul li a:hover { color: var(--gold); }
+    .footer-col ul li a i { font-size: 0.7rem; }
+    .footer-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 30px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-copy {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+    .footer-copy span { color: var(--gold); }
+    .footer-disclaimer {
+      color: var(--muted);
+      font-size: 0.75rem;
+      max-width: 600px;
+      text-align: center;
+      opacity: 0.6;
+    }
+
+    /* ===================== SCROLL REVEAL ===================== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===================== ANIMATIONS ===================== */
+    @keyframes fadeInDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ===================== PARTICLE FLOAT ===================== */
+    .float-particle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: floatUp linear infinite;
+      opacity: 0;
+    }
+    @keyframes floatUp {
+      0%{transform:translateY(0) scale(1);opacity:0}
+      10%{opacity:0.6}
+      90%{opacity:0.3}
+      100%{transform:translateY(-600px) scale(0.5);opacity:0}
+    }
+
+    /* ===================== MOBILE ===================== */
+    @media(max-width:900px){
+      .nav-links { display:none; position:fixed; top:72px; left:0; right:0; background:rgba(5,5,8,0.98); backdrop-filter:blur(20px); flex-direction:column; padding:30px; gap:20px; border-bottom:1px solid var(--border); }
+      .nav-links.open { display:flex; }
+      .hamburger { display:flex; }
+      .footer-top { grid-template-columns:1fr 1fr; }
+      .steps-grid::before { display:none; }
+    }
+    @media(max-width:600px){
+      .footer-top { grid-template-columns:1fr; }
+      .hero-stats { gap:25px; }
+      .cta-inner { padding:50px 28px; }
+    }
+
+    /* ===================== TRADING BOT DEMO ===================== */
+    .bot-demo {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 50px;
+    }
+    .bot-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 24px;
+      background: var(--dark3);
+      border-bottom: 1px solid var(--border);
+    }
+    .bot-dot { width:12px;height:12px;border-radius:50%; }
+    .bot-dot.red{background:#ff5f57}
+    .bot-dot.yellow{background:#febc2e}
+    .bot-dot.green-d{background:#28c840}
+    .bot-title { font-family:'Rajdhani',sans-serif; font-size:0.85rem; color:var(--muted); letter-spacing:2px; margin-left:auto; }
+    .bot-body { padding:24px; font-family:'Rajdhani',monospace; font-size:0.85rem; line-height:1.9; }
+    .bot-line { display:flex; gap:12px; align-items:center; }
+    .bot-time { color:var(--muted); min-width:75px; }
+    .bot-msg.success{color:var(--green)}
+    .bot-msg.warn{color:var(--gold)}
+    .bot-msg.info{color:var(--blue)}
+    .bot-msg.error{color:var(--red)}
+    .bot-cursor {
+      display:inline-block;
+      width:8px;height:16px;
+      background:var(--gold);
+      animation:cursorBlink 1s infinite;
+      vertical-align:middle;
+    }
+    @keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
+
+    /* ===================== SIGNAL CARDS ===================== */
+    .signals-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:20px;
+      margin-top:50px;
+    }
+    .signal-card {
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:24px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      transition:all 0.3s;
+    }
+    .signal-card:hover{transform:translateY(-4px);border-color:rgba(240,180,41,0.35)}
+    .signal-top{display:flex;align-items:center;justify-content:space-between}
+    .signal-pair{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;color:#fff}
+    .signal-type{padding:4px 12px;border-radius:50px;font-family:'Rajdhani',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+    .signal-type.buy{background:rgba(0,230,118,0.15);color:var(--green);border:1px solid rgba(0,230,118,0.3)}
+    .signal-type.sell{background:rgba(255,23,68,0.15);color:var(--red);border:1px solid rgba(255,23,68,0.3)}
+    .signal-bar-wrap{background:rgba(255,255,255,0.05);border-radius:50px;height:6px;overflow:hidden}
+    .signal-bar{height:100%;border-radius:50px;transition:width 1s ease}
+    .signal-bar.buy-bar{background:linear-gradient(90deg,#00b248,var(--green))}
+    .signal-bar.sell-bar{background:linear-gradient(90deg,#b20000,var(--red))}
+    .signal-meta{display:flex;justify-content:space-between}
+    .signal-meta span{font-family:'Rajdhani',sans-serif;font-size:0.8rem;color:var(--muted)}
+    .signal-meta strong{color:var(--text);font-weight:600}
+    .signal-confidence{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:700;color:var(--gold)}
+  </style>
+</head>
+<body>
+
+<!-- CANVAS BACKGROUND -->
+<canvas id="starCanvas"></canvas>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">ELITE TRADERS</div>
+  <div class="loader-bar-outer"><div class="loader-bar-inner"></div></div>
+  <div class="loader-text">Initializing Trading Systems...</div>
+</div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">
+    <div class="logo-icon"><i class="fas fa-chart-line"></i></div>
+    ELITE<span class="accent">TRADERS</span>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#signals">Signals</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#contact" class="nav-cta">Get Started</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger" onclick="toggleNav()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO SECTION -->
+<section class="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-radial"></div>
+  <!-- Floating particles -->
+  <div id="heroParticles"></div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Live Trading Active · Deriv Powered
+    </div>
+    <h1>
+      <span class="line1">Master The Markets</span>
+      <span class="line2">With Elite Precision</span>
+    </h1>
+    <p>Embark on an exhilarating journey into Deriv trading with Elite Traders — your gateway to automated bots, live signals, expert mentorship, and unparalleled trading experiences.</p>
+    <div class="hero-buttons">
+      <a href="#services" class="btn-primary">
+        <i class="fas fa-rocket"></i> Start Trading Now
+      </a>
+      <a href="#features" class="btn-secondary">
+        <i class="fas fa-play-circle"></i> Watch Demo
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-num" id="count1">0</span>
+        <span class="hero-stat-label">Active Traders</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num" id="count2">0</span>
+        <span class="hero-stat-label">Bots Deployed</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num" id="count3">0%</span>
+        <span class="hero-stat-label">Win Rate</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num" id="count4">$0</span>
+        <span class="hero-stat-label">Total Profit Generated</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-track" id="tickerTrack"></div>
+</div>
+
+<!-- LIVE CHART -->
+<div class="live-chart-section">
+  <div class="text-center">
+    <div class="section-label">Real-Time Data</div>
+    <h2 class="section-title">Live <span>Market Overview</span></h2>
+    <p class="section-sub">Monitor real-time price action and trading signals across all major Deriv instruments.</p>
+  </div>
+  <div class="chart-container reveal">
+    <div class="chart-header">
+      <div class="chart-title"><i class="fas fa-chart-area" style="margin-right:8px"></i>VOLATILITY 75 INDEX</div>
+      <div class="chart-tabs">
+        <button class="chart-tab active" onclick="setChartInterval(this,'1m')">1M</button>
+        <button class="chart-tab" onclick="setChartInterval(this,'5m')">5M</button>
+        <button class="chart-tab" onclick="setChartInterval(this,'15m')">15M</button>
+        <button class="chart-tab" onclick="setChartInterval(this,'1h')">1H</button>
+      </div>
+    </div>
+    <div class="chart-canvas-wrap">
+      <canvas id="liveChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="text-center">
+    <div class="section-label">Why Choose Us</div>
+    <h2 class="section-title">Elite <span>Trading Arsenal</span></h2>
+    <p class="section-sub">Everything you need to dominate the markets — automated, intelligent, and battle-tested.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <div class="feature-icon gold"><i class="fas fa-robot"></i></div>
+      <h3>AI Trading Bots</h3>
+      <p>Deploy powerful automated trading bots on Deriv's platform with no coding required. Our bots run 24/7 executing strategies with precision.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon green"><i class="fas fa-signal"></i></div>
+      <h3>Live Trading Signals</h3>
+      <p>Receive real-time, high-accuracy trading signals for Synthetic Indices, Forex, and Commodities — straight to your device.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon blue"><i class="fas fa-chart-bar"></i></div>
+      <h3>Advanced Analysis Tool</h3>
+      <p>Our proprietary analysis engine scans Deriv markets in real-time to identify high-probability setups and entry/exit zones.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon purple"><i class="fas fa-graduation-cap"></i></div>
+      <h3>Expert Mentorship</h3>
+      <p>Learn from seasoned professionals. Get personalized coaching on strategies, risk management, and trading psychology.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon gold"><i class="fas fa-shield-alt"></i></div>
+      <h3>Risk Management</h3>
+      <p>Smart position sizing and automated stop-loss mechanisms protect your capital while maximizing your profit potential.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon green"><i class="fas fa-users"></i></div>
+      <h3>Elite Community</h3>
+      <p>Join thousands of traders in our active Telegram and Discord community. Share strategies, get support, grow together.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services" class="services">
+  <div class="text-center">
+    <div class="section-label">What We Offer</div>
+    <h2 class="section-title">Our <span>Trading Services</span></h2>
+    <p class="section-sub">Comprehensive solutions for every trader — from beginners to professional algorithmic traders.</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-card reveal">
+      <div class="service-icon-wrap"><i class="fas fa-robot"></i></div>
+      <h3>Automated Trading Bots</h3>
+      <p>Pre-built and custom XML bots ready to deploy on Deriv Bot. Trade Synthetic Indices automatically while you sleep.</p>
+      <ul class="service-list">
+        <li><i class="fas fa-check"></i> Over/Under Digit Bots</li>
+        <li><i class="fas fa-check"></i> Even/Odd Strategy Bots</li>
+        <li><i class="fas fa-check"></i> Matches/Differs Bots</li>
+        <li><i class="fas fa-check"></i> Rise/Fall Accumulator Bots</li>
+        <li><i class="fas fa-check"></i> No Coding Required</li>
+      </ul>
+      <a href="#contact" class="service-link">Get Bots <i class="fas fa-arrow-right"></i></a>
+    </div>
+    <div class="service-card featured reveal">
+      <div class="service-badge">⭐ Most Popular</div>
+      <div class="service-icon-wrap"><i class="fas fa-broadcast-tower"></i></div>
+      <h3>Live Deriv Signals</h3>
+      <p>Real-time signals for Volatility Indices, Boom & Crash, Jump Indices, and more — with entry, TP & SL provided.</p>
+      <ul class="service-list">
+        <li><i class="fas fa-check"></i> Volatility 10/25/50/75/100</li>
+        <li><i class="fas fa-check"></i> Boom 500 & Crash 500</li>
+        <li><i class="fas fa-check"></i> Jump 10/25/50/75/100</li>
+        <li><i class="fas fa-check"></i> Step Index Signals</li>
+        <li><i class="fas fa-check"></i> Forex & Commodities</li>
+      </ul>
+      <a href="#contact" class="service-link">Join Signals <i class="fas fa-arrow-right"></i></a>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon-wrap"><i class="fas fa-chalkboard-teacher"></i></div>
+      <h3>Trading Mentorship</h3>
+      <p>Structured 1-on-1 and group mentorship programs covering Deriv strategies, technical analysis, and trading psychology.</p>
+      <ul class="service-list">
+        <li><i class="fas fa-check"></i> Beginner to Advanced Courses</li>
+        <li><i class="fas fa-check"></i> Weekly Live Webinars</li>
+        <li><i class="fas fa-check"></i> Video Course Library</li>
+        <li><i class="fas fa-check"></i> Personal Trade Reviews</li>
+        <li><i class="fas fa-check"></i> Certificate Upon Completion</li>
+      </ul>
+      <a href="#contact" class="service-link">Enroll Now <i class="fas fa-arrow-right"></i></a>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE SIGNALS DISPLAY -->
+<section id="signals">
+  <div class="text-center">
+    <div class="section-label">Live Feed</div>
+    <h2 class="section-title">Active <span>Trading Signals</span></h2>
+    <p class="section-sub">AI-powered signals updated in real-time. Each signal comes with confidence score and full context.</p>
+  </div>
+  <div class="signals-grid" id="signalsGrid">
+    <!-- Filled by JS -->
+  </div>
+</section>
+
+<!-- BOT DEMO -->
+<div style="padding:0 5% 100px; position:relative;z-index:1">
+  <div class="text-center" style="margin-bottom:0">
+    <div class="section-label">Live Bot Feed</div>
+    <h2 class="section-title">Trading Bot <span>Live Terminal</span></h2>
+    <p class="section-sub" style="margin:0 auto 0">Watch our bots execute trades in real-time on the Deriv platform.</p>
+  </div>
+  <div class="bot-demo reveal">
+    <div class="bot-header">
+      <div class="bot-dot red"></div>
+      <div class="bot-dot yellow"></div>
+      <div class="bot-dot green-d"></div>
+      <div class="bot-title">ELITE-BOT v3.2 · VOLATILITY 75 INDEX · LIVE</div>
+    </div>
+    <div class="bot-body" id="botTerminal"></div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section style="padding:100px 5%;position:relative;z-index:1;">
+  <div class="text-center">
+    <div class="section-label">Simple Process</div>
+    <h2 class="section-title">How It <span>Works</span></h2>
+    <p class="section-sub">Get started with Elite Traders in just four simple steps.</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card reveal">
+      <div class="step-num">01</div>
+      <h3>Create Deriv Account</h3>
+      <p>Sign up for a free Deriv account and verify your identity. Start with a demo account and practice risk-free.</p>
+    </div>
+    <div class="step-card reveal">
+      <div class="step-num">02</div>
+      <h3>Join Elite Traders</h3>
+      <p>Choose your plan and gain instant access to our bots, signals, and exclusive trading community.</p>
+    </div>
+    <div class="step-card reveal">
+      <div class="step-num">03</div>
+      <h3>Deploy Your Bot</h3>
+      <p>Download your pre-configured XML bot and upload it to Deriv Bot. Configure your stake and go live.</p>
+    </div>
+    <div class="step-card reveal">
+      <div class="step-num">04</div>
+      <h3>Profit & Scale</h3>
+      <p>Monitor your trades, receive signals, grow your account, and scale with confidence using our proven strategies.</p>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-section">
+  <div class="text-center">
+    <div class="section-label">Our Track Record</div>
+    <h2 class="section-title">Numbers That <span>Speak</span></h2>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card reveal">
+      <div class="stat-icon"><i class="fas fa-users"></i></div>
+      <span class="stat-number" data-target="12500">0</span>
+      <span class="stat-label">Active Members</span>
+    </div>
+    <div class="stat-card reveal">
+      <div class="stat-icon"><i class="fas fa-robot"></i></div>
+      <span class="stat-number" data-target="340">0</span>
+      <span class="stat-label">Bots Deployed</span>
+    </div>
+    <div class="stat-card reveal">
+      <div class="stat-icon"><i class="fas fa-percent"></i></div>
+      <span class="stat-number" data-target="87" data-suffix="%">0</span>
+      <span class="stat-label">Signal Win Rate</span>
+    </div>
+    <div class="stat-card reveal">
+      <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+      <span class="stat-number" data-target="2400000" data-prefix="$">0</span>
+      <span class="stat-label">Profits Generated</span>
+    </div>
+    <div class="stat-card reveal">
+      <div class="stat-icon"><i class="fas fa-globe-africa"></i></div>
+      <span class="stat-number" data-target="18">0</span>
+      <span class="stat-label">Countries Served</span>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="text-center">
+    <div class="section-label">Membership Plans</div>
+    <h2 class="section-title">Choose Your <span>Trading Plan</span></h2>
+    <p class="section-sub">Transparent pricing. No hidden fees. Cancel anytime. Start with a free plan today.</p>
+  </div>
+  <div class="pricing-grid">
+    <div class="price-card reveal">
+      <div class="price-plan">Starter</div>
+      <div class="price-name">Free Trader</div>
+      <div class="price-amount"><sup>$</sup>0<span>/mo</span></div>
+      <div class="price-desc">Perfect to get started & explore.</div>
+      <ul class="price-features">
+        <li><i class="fas fa-check"></i> Access to Community</li>
+        <li><i class="fas fa-check"></i> 1 Free Bot Download</li>
+        <li><i class="fas fa-check"></i> Basic Signals (Delayed)</li>
+        <li class="muted"><i class="fas fa-times"></i> Advanced Analysis Tool</li>
+        <li class="muted"><i class="fas fa-times"></i> Premium Bots</li>
+        <li class="muted"><i class="fas fa-times"></i> 1-on-1 Mentorship</li>
+      </ul>
+      <a href="#contact" class="btn-secondary" style="width:100%;justify-content:center">Get Started Free</a>
+    </div>
+    <div class="price-card popular reveal">
+      <div class="popular-badge">⚡ Most Popular</div>
+      <div class="price-plan">Professional</div>
+      <div class="price-name">Pro Trader</div>
+      <div class="price-amount"><sup>$</sup>29<span>/mo</span></div>
+      <div class="price-desc">For serious traders who want an edge.</div>
+      <ul class="price-features">
+        <li><i class="fas fa-check"></i> Everything in Free</li>
+        <li><i class="fas fa-check"></i> 10 Premium Bots</li>
+        <li><i class="fas fa-check"></i> Real-Time Live Signals</li>
+        <li><i class="fas fa-check"></i> Advanced Analysis Tool</li>
+        <li><i class="fas fa-check"></i> Weekly Webinars</li>
+        <li class="muted"><i class="fas fa-times"></i> 1-on-1 Mentorship</li>
+      </ul>
+      <a href="#contact" class="btn-primary" style="width:100%;justify-content:center">Upgrade to Pro</a>
+    </div>
+    <div class="price-card reveal">
+      <div class="price-plan">Elite</div>
+      <div class="price-name">Elite Trader</div>
+      <div class="price-amount"><sup>$</sup>79<span>/mo</span></div>
+      <div class="price-desc">For those who demand the absolute best.</div>
+      <ul class="price-features">
+        <li><i class="fas fa-check"></i> Everything in Pro</li>
+        <li><i class="fas fa-check"></i> Unlimited Premium Bots</li>
+        <li><i class="fas fa-check"></i> Priority Signal Access</li>
+        <li><i class="fas fa-check"></i> 1-on-1 Mentorship Sessions</li>
+        <li><i class="fas fa-check"></i> Custom Bot Development</li>
+        <li><i class="fas fa-check"></i> VIP Community Access</li>
+      </ul>
+      <a href="#contact" class="btn-secondary" style="width:100%;justify-content:center">Go Elite</a>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="text-center">
+    <div class="section-label">Community Reviews</div>
+    <h2 class="section-title">What Our <span>Traders Say</span></h2>
+    <p class="section-sub">Real feedback from real traders in our community across Kenya and beyond.</p>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial-card reveal">
+      <div class="testimonial-stars">★★★★★</div>
+      <div class="testimonial-text"> The Elite Traders bots are an absolute game-changer. I grew my account from $100 to $430 in just 3 weeks using the Volatility 75 bot. The signals are incredibly accurate! </div>
+      <div class="testimonial-author">
+        <div class="avatar gold">JM</div>
+        <div>
+          <div class="author-name">James Mwangi</div>
+          <div class="author-tag">Nairobi, Kenya · Pro Trader</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal">
+      <div class="testimonial-stars">★★★★★</div>
+      <div class="testimonial-text"> I was a complete beginner 4 months ago. The mentorship program taught me everything. Now I'm consistently profitable trading Boom & Crash on Deriv. Best investment ever! </div>
+      <div class="testimonial-author">
+        <div class="avatar green">AK</div>
+        <div>
+          <div class="author-name">Amina Kamau</div>
+          <div class="author-tag">Mombasa, Kenya · Elite Trader</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal">
+      <div class="testimonial-stars">★★★★★</div>
+      <div class="testimonial-text"> The analysis tool alone is worth 10x the subscription price. It tells me exactly when to enter and exit trades. My win rate went from 40% to over 80% since joining. </div>
+      <div class="testimonial-author">
+        <div class="avatar blue">DO</div>
+        <div>
+          <div class="author-name">David Omondi</div>
+          <div class="author-tag">Kisumu, Kenya · Pro Trader</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" style="padding:100px 5%;position:relative;z-index:1">
+  <div class="text-center">
+    <div class="section-label">Got Questions?</div>
+    <h2 class="section-title">Frequently Asked <span>Questions</span></h2>
+  </div>
+  <div class="faq-list">
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        What is Deriv and how do Elite Traders bots work?
+        <i class="fas fa-plus faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Deriv is a leading online trading platform offering Synthetic Indices, Forex, and more. Our bots are XML files uploaded to Deriv Bot — they automatically execute trades based on our proven strategies 24/7 without any manual intervention needed.</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        How much capital do I need to start trading?
+        <i class="fas fa-plus faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>You can start trading on Deriv with as little as $1 USD. However, we recommend starting with at least $50–$100 for optimal bot performance and proper risk management to allow for market fluctuations.</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        Are the trading bots really free?
+        <i class="fas fa-plus faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Yes! We provide free access to select bots and strategies for all members. Premium bots with advanced strategies and higher win rates are available on our Pro and Elite subscription plans.</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        Do I need trading experience to join?
+        <i class="fas fa-plus faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Absolutely not! Elite Traders is designed for all levels — from complete beginners to experienced traders. Our bots and signals are beginner-friendly, and our mentorship program will guide you from scratch to proficiency.</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        How do I receive the trading signals?
+        <i class="fas fa-plus faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Signals are delivered through our private Telegram channel and on this platform in real-time. Each signal includes the instrument, direction (Buy/Sell), entry point, take profit, and stop loss levels.</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        Can I cancel my subscription at any time?
+        <i class="fas fa-plus faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Yes, you can cancel your subscription at any time with no penalties or hidden fees. Your access will remain active until the end of your current billing period.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA SECTION -->
+<section id="contact" class="cta-section">
+  <div class="cta-inner reveal">
+    <div class="section-label" style="justify-content:center;margin-bottom:16px">Limited Spots Available</div>
+    <h2>Ready to <span style="background:linear-gradient(135deg,var(--gold-dark),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Trade Like An Elite?</span></h2>
+    <p>Join thousands of traders already using Elite Traders to grow their Deriv accounts. Get instant access to bots, signals, and mentorship today.</p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <a href="#pricing" class="btn-primary">
+        <i class="fas fa-bolt"></i> Start Free Today
+      </a>
+      <a href="https://t.me/elitetraders" target="_blank" class="btn-secondary">
+        <i class="fab fa-telegram"></i> Join Telegram
+      </a>
+    </div>
+    <div style="margin-top:30px;display:flex;justify-content:center;gap:30px;flex-wrap:wrap">
+      <span style="color:var(--muted);font-size:0.82rem;display:flex;align-items:center;gap:6px"><i class="fas fa-shield-alt" style="color:var(--green)"></i> No Credit Card Required</span>
+      <span style="color:var(--muted);font-size:0.82rem;display:flex;align-items:center;gap:6px"><i class="fas fa-lock" style="color:var(--green)"></i> 100% Secure</span>
+      <span style="color:var(--muted);font-size:0.82rem;display:flex;align-items:center;gap:6px"><i class="fas fa-undo" style="color:var(--green)"></i> Cancel Anytime</span>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo">
+        <div class="logo-icon"><i class="fas fa-chart-line"></i></div>
+        ELITE<span class="accent">TRADERS</span>
+      </a>
+      <p>Kenya's premier Deriv trading ecosystem. Empowering traders with AI-powered bots, real-time signals, and expert mentorship since 2023.</p>
+      <div class="footer-socials">
+        <a href="#" class="social-btn"><i class="fab fa-telegram"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-whatsapp"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-youtube"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-twitter"></i></a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <ul>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Trading Bots</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Live Signals</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Analysis Tool</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Mentorship</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Copy Trading</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Markets</h4>
+      <ul>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Synthetic Indices</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Forex Pairs</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Boom & Crash</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Jump Indices</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Commodities</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> About Us</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Blog</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Careers</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Privacy Policy</a></li>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Contact Us</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2024 <span>Elite Traders</span> · Made with ❤️ in Kenya</div>
+    <div class="footer-disclaimer">⚠️ Trading involves risk. Past performance is not indicative of future results. Trade responsibly.</div>
+    <div class="footer-copy">Powered by <span>Deriv API</span></div>
+  </div>
+</footer>
+
+<!-- CHART.JS CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// ==================== LOADER ====================
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('loader').classList.add('hide');
+    startCounters();
+  }, 2700);
+});
+
+// ==================== STAR CANVAS ====================
+const canvas = document.getElementById('starCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+for (let i = 0; i < 180; i++) {
+  stars.push({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    r: Math.random() * 1.5 + 0.3,
+    alpha: Math.random(),
+    speed: Math.random() * 0.003 + 0.001,
+    pulse: Math.random() * Math.PI * 2
+  });
+}
+
+function animateStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    s.pulse += s.speed;
+    const a = (Math.sin(s.pulse) + 1) / 2 * 0.7 + 0.1;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(240, 180, 41, ${a})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(animateStars);
+}
+animateStars();
+
+// ==================== NAVBAR ====================
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+function toggleNav() {
+  document.getElementById('navLinks').classList.toggle('open');
+}
+
+// ==================== HERO PARTICLES ====================
+const heroParticles = document.getElementById('heroParticles');
+for (let i = 0; i < 20; i++) {
+  const p = document.createElement('div');
+  p.className = 'float-particle';
+  const size = Math.random() * 4 + 2;
+  p.style.cssText = `
+    width:${size}px;height:${size}px;
+    background:rgba(240,180,41,${Math.random() * 0.5 + 0.2});
+    left:${Math.random() * 100}%;
+    bottom:0;
+    animation-duration:${Math.random() * 8 + 6}s;
+    animation-delay:${Math.random() * 6}s;
+    position:absolute;
+  `;
+  heroParticles.appendChild(p);
+}
+
+// ==================== TICKER ====================
+const tickerData = [
+  {pair:'EUR/USD', price:'1.08542', change:'+0.12%', up:true},
+  {pair:'GBP/USD', price:'1.27334', change:'-0.08%', up:false},
+  {pair:'VOL 75', price:'834,121', change:'+1.43%', up:true},
+  {pair:'BOOM 500', price:'9,541.2', change:'+2.14%', up:true},
+  {pair:'CRASH 500', price:'8,832.5', change:'-1.22%', up:false},
+  {pair:'USD/JPY', price:'149.752', change:'+0.31%', up:true},
+  {pair:'GOLD', price:'2,341.80', change:'+0.95%', up:true},
+  {pair:'JUMP 75', price:'23,441', change:'-0.44%', up:false},
+  {pair:'VOL 100', price:'1,204,332', change:'+0.88%', up:true},
+  {pair:'BTC/USD', price:'64,210', change:'+3.21%', up:true},
+];
+
+function buildTicker() {
+  const track = document.getElementById('tickerTrack');
+  const makeItems = () => tickerData.map(d => `
+    <div class="ticker-item">
+      <span class="pair">${d.pair}</span>
+      <span class="price">${d.price}</span>
+      <span class="change ${d.up?'up':'down'}">${d.up?'▲':'▼'} ${d.change}</span>
+    </div>
+    <div class="ticker-sep">·</div>
+  `).join('');
+  track.innerHTML = makeItems() + makeItems();
+}
+buildTicker();
+
+// ==================== LIVE CHART ====================
+let liveChartInstance = null;
+const chartLabels = [];
+const chartData = [];
+let basePrice = 834000;
+
+for (let i = 60; i >= 0; i--) {
+  const d = new Date();
+  d.setSeconds(d.getSeconds() - i * 10);
+  chartLabels.push(d.toLocaleTimeString());
+  basePrice += (Math.random() - 0.49) * 500;
+  chartData.push(parseFloat(basePrice.toFixed(2)));
+}
+
+function initChart() {
+  const chartCtx = document.getElementById('liveChart').getContext('2d');
+  const gradient = chartCtx.createLinearGradient(0, 0, 0, 320);
+  gradient.addColorStop(0, 'rgba(240,180,41,0.25)');
+  gradient.addColorStop(1, 'rgba(240,180,41,0)');
+
+  liveChartInstance = new Chart(chartCtx, {
+    type: 'line',
+    data: {
+      labels: chartLabels,
+      datasets: [{
+        label: 'Volatility 75 Index',
+        data: chartData,
+        borderColor: '#f0b429',
+        backgroundColor: gradient,
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: '#f0b429',
+        tension: 0.4,
+        fill: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 300 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          backgroundColor: '#13131a',
+          borderColor: 'rgba(240,180,41,0.3)',
+          borderWidth: 1,
+          titleColor: '#f0b429',
+          bodyColor: '#e8e8f0',
+          padding: 12,
+          callbacks: {
+            label: ctx => ` ${ctx.parsed.y.toLocaleString()}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+          ticks: { color: '#7a7a9a', maxTicksLimit: 8, font: { family: 'Rajdhani', size: 11 } }
+        },
+        y: {
+          grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+          ticks: {
+            color: '#7a7a9a',
+            font: { family: 'Rajdhani', size: 11 },
+            callback: v => v.toLocaleString()
+          }
+        }
+      },
+      interaction: { mode: 'nearest', axis: 'x', intersect: false }
+    }
+  });
+}
+
+function updateChart() {
+  if (!liveChartInstance) return;
+  const now = new Date().toLocaleTimeString();
+  basePrice += (Math.random() - 0.49) * 400;
+  liveChartInstance.data.labels.push(now);
+  liveChartInstance.data.datasets[0].data.push(parseFloat(basePrice.toFixed(2)));
+  if (liveChartInstance.data.labels.length > 70) {
+    liveChartInstance.data.labels.shift();
+    liveChartInstance.data.datasets[0].data.shift();
+  }
+  liveChartInstance.update('none');
+}
+
+setTimeout(() => { initChart(); setInterval(updateChart, 2000); }, 3000);
+
+function setChartInterval(el, interval) {
+  document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ==================== SIGNALS ====================
+const signalsData = [
+  { pair: 'VOL 75', type: 'buy', confidence: 92, entry: '834,120', tp: '836,500', sl: '832,800' },
+  { pair: 'BOOM 500', type: 'sell', confidence: 78, entry: '9,541.2', tp: '9,480.0', sl: '9,580.0' },
+  { pair: 'EUR/USD', type: 'buy', confidence: 85, entry: '1.08542', tp: '1.08810', sl: '1.08320' },
+  { pair: 'CRASH 500', type: 'sell', confidence: 88, entry: '8,832.5', tp: '8,760.0', sl: '8,890.0' },
+  { pair: 'JUMP 75', type: 'buy', confidence: 71, entry: '23,441', tp: '23,680', sl: '23,290' },
+  { pair: 'GOLD', type: 'buy', confidence: 95, entry: '2341.80', tp: '2360.00', sl: '2328.00' },
+];
+
+function buildSignals() {
+  const grid = document.getElementById('signalsGrid');
+  grid.innerHTML = signalsData.map(s => `
+    <div class="signal-card reveal">
+      <div class="signal-top">
+        <div class="signal-pair">${s.pair}</div>
+        <div class="signal-type ${s.type}">${s.type.toUpperCase()}</div>
+      </div>
+      <div class="signal-confidence">${s.confidence}% <small style="font-size:0.7rem;color:var(--muted)">confidence</small></div>
+      <div class="signal-bar-wrap">
+        <div class="signal-bar ${s.type}-bar" style="width:${s.confidence}%"></div>
+      </div>
+      <div class="signal-meta">
+        <span>Entry: <strong>${s.entry}</strong></span>
+        <span>TP: <strong style="color:var(--green)">${s.tp}</strong></span>
+        <span>SL: <strong style="color:var(--red)">${s.sl}</strong></span>
+      </div>
+    </div>
+  `).join('');
+  initReveal();
+}
+buildSignals();
+
+// ==================== BOT TERMINAL ====================
+const botLogs = [
+  { type: 'info', msg: 'Bot initialized · Strategy: OVER/UNDER 4 · Market: VOL 75' },
+  { type: 'warn', msg: 'Scanning market conditions... RSI: 58.4 · MACD: Bullish Cross' },
+  { type: 'success', msg: 'SIGNAL DETECTED ✓ · Contract: OVER 4 · Stake: $2.50' },
+  { type: 'success', msg: 'CONTRACT PLACED · ID: #81274563 · Tick: 1,234,567' },
+  { type: 'success', msg: 'TRADE WON ✓ · Payout: $4.87 · Profit: +$2.37' },
+  { type: 'info', msg: 'Recalculating stake... Balance: $102.37 · Next stake: $2.50' },
+  { type: 'warn', msg: 'Volatility spike detected · Pausing for 3 ticks...' },
+  { type: 'success', msg: 'CONTRACT PLACED · Strategy: UNDER 5 · Stake: $2.50' },
+  { type: 'success', msg: 'TRADE WON ✓ · Payout: $4.87 · Profit: +$2.37' },
+  { type: 'info', msg: 'Session profit: +$4.74 · Win rate: 100% (2/2)' },
+  { type: 'warn', msg: 'Smart trailing stop active · Protecting profits...' },
+  { type: 'success', msg: 'VIRTUAL HOOK active 🔥 · Scanning for re-entry...' },
+];
+
+let logIndex = 0;
+const terminal = document.getElementById('botTerminal');
+
+function addBotLog() {
+  if (logIndex >= botLogs.length) logIndex = 0;
+  const log = botLogs[logIndex++];
+  const now = new Date().toLocaleTimeString();
+  const line = document.createElement('div');
+  line.className = 'bot-line';
+  line.innerHTML = `<span class="bot-time">[${now}]</span><span class="bot-msg ${log.type}">${log.msg}</span>`;
+  terminal.appendChild(line);
+  if (terminal.children.length > 12) terminal.removeChild(terminal.firstChild);
+  terminal.scrollTop = terminal.scrollHeight;
+}
+
+// Seed initial logs
+for (let i = 0; i < 6; i++) addBotLog();
+setInterval(addBotLog, 2500);
+
+// Add cursor
+const cursor = document.createElement('div');
+cursor.className = 'bot-line';
+cursor.innerHTML = `<span class="bot-time">[LIVE]</span><span class="bot-cursor"></span>`;
+terminal.appendChild(cursor);
+
+// ==================== COUNTERS ====================
+function startCounters() {
+  const counters = [
+    { el: document.getElementById('count1'), target: 12500, suffix: '+', prefix: '' },
+    { el: document.getElementById('count2'), target: 340, suffix: '+', prefix: '' },
+    { el: document.getElementById('count3'), target: 87, suffix: '%', prefix: '' },
+    { el: document.getElementById('count4'), target: 2400000, suffix: '', prefix: '$' },
+  ];
+  counters.forEach(c => {
+    let current = 0;
+    const increment = c.target / 80;
+    const timer = setInterval(() => {
+      current = Math.min(current + increment, c.target);
+      const val = c.target > 1000
+        ? (current >= 1000000 ? (current/1000000).toFixed(1)+'M' : Math.floor(current/1000)+'K')
+        : Math.floor(current);
+      c.el.textContent = c.prefix + val + c.suffix;
+      if (current >= c.target) clearInterval(timer);
+    }, 25);
+  });
+}
+
+// ==================== STAT COUNTERS ====================
+function animateStatNumbers() {
+  document.querySelectorAll('.stat-number[data-target]').forEach(el => {
+    const target = parseInt(el.getAttribute('data-target'));
+    const prefix = el.getAttribute('data-prefix') || '';
+    const suffix = el.getAttribute('data-suffix') || '';
+    let current = 0;
+    const increment = target / 80;
+    const timer = setInterval(() => {
+      current = Math.min(current + increment, target);
+      let display = Math.floor(current);
+      if (target >= 1000000) display = (current / 1000000).toFixed(1) + 'M';
+      else if (target >= 1000) display = Math.floor(current / 1000) + 'K+';
+      el.textContent = prefix + display + suffix;
+      if (current >= target) clearInterval(timer);
+    }, 25);
+  });
+}
+
+// ==================== SCROLL REVEAL ====================
+function initReveal() {
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+          if (entry.target.closest('.stats-section')) animateStatNumbers();
+        }, i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+}
+initReveal();
+
+// ==================== FAQ ====================
+function toggleFaq(btn) {
+  const item = btn.parentElement;
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+// ==================== SMOOTH SCROLL ====================
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById('navLinks').classList.remove('open');
+    }
+  });
+});
+
+// ==================== LIVE TICKER PRICE UPDATE ====================
+setInterval(() => {
+  const items = document.querySelectorAll('.ticker-item .change');
+  items.forEach(el => {
+    const isUp = Math.random() > 0.45;
+    const pct = (Math.random() * 2).toFixed(2);
+    el.textContent = `${isUp ? '▲' : '▼'} ${isUp ? '+' : '-'}${pct}%`;
+    el.className = `change ${isUp ? 'up' : 'down'}`;
+  });
+}, 4000);
+</script>
+</body>
+</html>
