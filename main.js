@@ -123,8 +123,8 @@ function initTicker() {
     tickerItems.forEach(el => {
       const isUp = Math.random() > 0.45;
       const pct = (Math.random() * 2).toFixed(2);
-      el.textContent = `${isUp ? '▲' : '▼'} ${isUp ? '+' : '-'}\${pct}%`;
-      el.className = `change \${isUp ? 'up' : 'down'}`;
+      el.textContent = `${isUp ? '▲' : '▼'} ${isUp ? '+' : '-'}${pct}%`;
+      el.className = `change ${isUp ? 'up' : 'down'}`;
     });
   }, 4000);
 }

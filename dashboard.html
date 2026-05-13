@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FXBotHub | Live Trading Terminal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    body { background: #050508; color: #e8e8f0; }
+    .dashboard-container {
+      display: grid;
+      grid-template-columns: 300px 1fr 350px;
+      height: calc(100vh - 72px);
+      margin-top: 72px;
+      gap: 1px;
+      background: #18181f;
+    }
+    .panel { background: #0a0a0f; padding: 20px; overflow-y: auto; }
+    .sidebar { border-right: 1px solid #18181f; }
+    .main-view { background: #050508; display: flex; flex-direction: column; }
+    .right-bar { border-left: 1px solid #18181f; }
+
+    .account-card {
+      background: #13131a;
+      border: 1px solid rgba(240,180,41,0.15);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    .balance { font-family: 'Orbitron'; font-size: 1.5rem; color: #f0b429; margin: 10px 0; }
+
+    .market-list { list-style: none; }
+    .market-item {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      transition: background 0.3s;
+    }
+    .market-item:hover { background: rgba(255,255,255,0.05); }
+    .market-item.active { background: rgba(240,180,41,0.1); border: 1px solid rgba(240,180,41,0.3); }
+
+    .trade-controls { padding: 25px; background: #0a0a0f; border-top: 1px solid #18181f; }
+    .stake-input {
+      width: 100%;
+      background: #13131a;
+      border: 1px solid #18181f;
+      color: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: 'Orbitron';
+      margin-top: 10px;
+    }
+    .trade-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+    .btn-buy { background: #00e676; color: #000; font-weight: 700; border: none; padding: 15px; border-radius: 8px; cursor: pointer; }
+    .btn-sell { background: #ff1744; color: #fff; font-weight: 700; border: none; padding: 15px; border-radius: 8px; cursor: pointer; }
+
+    #dashboardChart { flex-grow: 1; min-height: 400px; padding: 20px; }
+  </style>
+</head>
+<body>
+
+<nav id="navbar">
+  <a href="index.html" class="nav-logo">
+    <div class="logo-icon"><i class="fas fa-chart-line"></i></div>
+    FXBOT<span class="accent">HUB</span>
+  </a>
+  <div class="user-profile" style="display:flex; align-items:center; gap:15px;">
+    <span id="userBalance" style="color:#f0b429; font-family:'Orbitron'; font-weight:700;">$0.00</span>
+    <div class="avatar gold" style="width:35px; height:35px;">U</div>
+  </div>
+</nav>
+
+<div class="dashboard-container">
+  <div class="panel sidebar">
+    <h4 style="color:#f0b429; margin-bottom:15px; font-family:'Orbitron'; font-size:0.8rem;">MARKETS</h4>
+    <ul class="market-list">
+      <li class="market-item active" data-symbol="R_100">
+        <span>Volatility 100</span>
+        <span class="price">0.00</span>
+      </li>
+      <li class="market-item" data-symbol="R_75">
+        <span>Volatility 75</span>
+        <span class="price">0.00</span>
+      </li>
+      <li class="market-item" data-symbol="R_50">
+        <span>Volatility 50</span>
+        <span class="price">0.00</span>
+      </li>
+      <li class="market-item" data-symbol="R_25">
+        <span>Volatility 25</span>
+        <span class="price">0.00</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="main-view">
+    <div id="dashboardChart">
+       <canvas id="liveTradingChart"></canvas>
+    </div>
+    <div class="trade-controls">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="color:#7a7a9a;">STAKE AMOUNT ($)</span>
+        <input type="number" class="stake-input" value="10" style="width:120px;">
+      </div>
+      <div class="trade-btns">
+        <button class="btn-buy" onclick="placeTrade('CALL')">RISE <i class="fas fa-arrow-up"></i></button>
+        <button class="btn-sell" onclick="placeTrade('PUT')">FALL <i class="fas fa-arrow-down"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel right-bar">
+    <h4 style="color:#f0b429; margin-bottom:15px; font-family:'Orbitron'; font-size:0.8rem;">TRADE HISTORY</h4>
+    <div id="tradeHistory" style="font-size:0.85rem; color:#7a7a9a;">
+      No trades yet in this session.
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="deriv_api.js"></script>
+<script>
+  const api = new DerivAPI();
+  let currentSymbol = 'R_100';
+  let chart;
+
+  async function init() {
+    await api.connect();
+    setupChart();
+    subscribeToTicks();
+  }
+
+  function setupChart() {
+    const ctx = document.getElementById('liveTradingChart').getContext('2d');
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: Array(30).fill(''),
+        datasets: [{
+          label: 'Market Price',
+          data: [],
+          borderColor: '#f0b429',
+          borderWidth: 2,
+          pointRadius: 0,
+          fill: true,
+          backgroundColor: 'rgba(240, 180, 41, 0.1)',
+          tension: 0.2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { display: false },
+          y: { grid: { color: '#18181f' }, ticks: { color: '#7a7a9a' } }
+        }
+      }
+    });
+  }
+
+  function subscribeToTicks() {
+    api.subscribeTick(currentSymbol, (tick) => {
+      // Update price in sidebar
+      const item = document.querySelector(`[data-symbol="${currentSymbol}"] .price`);
+      if (item) item.textContent = tick.quote;
+
+      // Update chart
+      chart.data.datasets[0].data.push(tick.quote);
+      if (chart.data.datasets[0].data.length > 30) chart.data.datasets[0].data.shift();
+      chart.update('none');
+    });
+  }
+
+  function placeTrade(type) {
+    const history = document.getElementById('tradeHistory');
+    if (history.textContent.includes('No trades')) history.innerHTML = '';
+
+    const time = new Date().toLocaleTimeString();
+    const data = chart.data.datasets[0].data;
+    const entry = data.length > 0 ? data[data.length - 1] : '...';
+
+    const div = document.createElement('div');
+    div.style.padding = '10px 0';
+    div.style.borderBottom = '1px solid #18181f';
+    div.innerHTML = `
+      <div style="display:flex; justify-content:space-between;">
+        <span style="color:#fff;">${currentSymbol}</span>
+        <span style="color:${type === 'CALL' ? '#00e676' : '#ff1744'};">${type}</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-top:5px; opacity:0.6;">
+        <span>@ ${entry}</span>
+        <span>${time}</span>
+      </div>
+    `;
+    history.prepend(div);
+  }
+
+  document.querySelectorAll('.market-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelector('.market-item.active').classList.remove('active');
+      item.classList.add('active');
+      api.unsubscribeTick(currentSymbol);
+      currentSymbol = item.getAttribute('data-symbol');
+      chart.data.datasets[0].data = [];
+      subscribeToTicks();
+    });
+  });
+
+  init();
+</script>
+</body>
+</html>
