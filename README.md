@@ -1,1 +1,1 @@
-# deriv-site-third-party
+# FXBotHub - Deriv Third-Party Trading Site
